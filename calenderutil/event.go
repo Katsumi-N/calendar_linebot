@@ -16,7 +16,7 @@ type Schedule struct {
 	End      string
 }
 
-func ShowEvents() {
+func RetrieveEvents() {
 	clt := SetClient()
 	t := time.Now().Format(time.RFC3339)
 	events, err := clt.Events.List("primary").ShowDeleted(false).SingleEvents(true).
