@@ -10,8 +10,8 @@ import (
 )
 
 func main() {
-	e := calenderutil.RetrieveEvents(10)
-	fmt.Println(e)
+	ev := calenderutil.RetrieveEvents(10)
+
 	// mi, h, d, m, y := calenderutil.ParseDate(e[0].Start)
 	// fmt.Println(y, m, d, h, mi)
 
@@ -23,7 +23,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	message := linebot.NewTextMessage(e[0].Title)
+	messagestr := "直近の予定です\n"
+	for _, m := range ev {
+		title := m.Title
+		smin, shour, sday, smonth, _ := calenderutil.ParseDate(m.Start)
+		emin, ehour, eday, emonth, _ := calenderutil.ParseDate(m.End)
+		messagestr += fmt.Sprintf("%s %s/%s %s:%s - %s/%s %s:%s\n ", title, smonth, sday, shour, smin,
+			emonth, eday, ehour, emin)
+
+	}
+	message := linebot.NewTextMessage(messagestr)
 
 	if _, err := bot.BroadcastMessage(message).Do(); err != nil {
 		log.Fatal(err)

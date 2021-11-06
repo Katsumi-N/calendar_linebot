@@ -2,6 +2,7 @@ package calenderutil
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -30,7 +31,7 @@ func RetrieveEvents(eventNum int) []Schedule {
 	}
 	fmt.Println("Upcoming events:")
 
-	retEvents := make([]Schedule, eventNum)
+	retEvents := make([]Schedule, len(events.Items))
 	for i, item := range events.Items {
 		date := item.Start.DateTime
 		enddate := item.End.DateTime
@@ -47,12 +48,18 @@ func RetrieveEvents(eventNum int) []Schedule {
 	return retEvents
 }
 
-func ParseDate(date string) (int, int, int, int, int) {
+func ParseDate(date string) (string, string, string, string, string) {
 	layout := "2006-01-02T15:04:05+09:00"
 	t, _ := time.Parse(layout, date)
 	fmt.Println(t)
-	hour, minutes := t.Hour(), t.Minute()
+	hour, minutes := strconv.Itoa(t.Hour()), strconv.Itoa(t.Minute())
+	if len(hour) == 1 {
+		hour = "0" + hour
+	}
+	if len(minutes) == 1 {
+		minutes = "0" + minutes
+	}
 	year, month, day := t.Date()
-	return minutes, hour, day, int(month), year
+	return minutes, hour, strconv.Itoa(day), strconv.Itoa(int(month)), strconv.Itoa(year)
 
 }
