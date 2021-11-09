@@ -20,11 +20,13 @@ func (s *Schedule) SetSchedule(title string, location string, start string, end 
 	s.End = end
 }
 
-func RetrieveEvents(eventNum int) []Schedule {
+func RetrieveEvents(eventNum int, limitday int) []Schedule {
 	clt := SetClient()
 	t := time.Now().Format(time.RFC3339)
+	limit := time.Now().AddDate(0, 0, limitday).Format(time.RFC3339)
+
 	events, err := clt.Events.List("primary").ShowDeleted(false).SingleEvents(true).
-		TimeMin(t).MaxResults(int64(eventNum)).OrderBy("startTime").Do()
+		TimeMin(t).TimeMax(limit).MaxResults(int64(eventNum)).OrderBy("startTime").Do()
 
 	if err != nil {
 		fmt.Printf("Unable to retrieve next %v user events", eventNum)

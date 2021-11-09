@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/Katsumi-N/calendar_linebot/calenderutil"
 	"github.com/Katsumi-N/calendar_linebot/config"
@@ -10,10 +11,29 @@ import (
 )
 
 func main() {
-	ev := calenderutil.RetrieveEvents(10)
+	timer(16, 56, 1)
+}
 
-	// mi, h, d, m, y := calenderutil.ParseDate(e[0].Start)
-	// fmt.Println(y, m, d, h, mi)
+func timer(shour int, sminute int, limitday int) {
+	t := time.NewTicker(1 * time.Minute)
+	for {
+		select {
+		case <-t.C:
+			fmt.Println(time.Now())
+			// 月曜日に一週間の予定を送る
+			if time.Now().Weekday() == 1 && time.Now().Hour() == shour && time.Now().Minute() == sminute {
+				sendRecentSchedule(100, 7, "今週一週間の予定です．張り切っていきましょー！\n")
+			}
+			// １日の予定を毎日送る
+			if time.Now().Hour() == shour && time.Now().Minute() == sminute {
+				sendRecentSchedule(100, limitday, "今日の予定です．忘れずにね！\n")
+			}
+		}
+	}
+}
+
+func sendRecentSchedule(eventNum int, limitday int, header string) {
+	ev := calenderutil.RetrieveEvents(eventNum, limitday)
 
 	bot, err := linebot.New(
 		config.Config.ChannelSecret, config.Config.ChannelToken,
@@ -23,12 +43,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	messagestr := "直近の予定です\n"
+	messagestr := header + "\n"
 	for _, m := range ev {
 		title := m.Title
 		smin, shour, sday, smonth, _ := calenderutil.ParseDate(m.Start)
 		emin, ehour, eday, emonth, _ := calenderutil.ParseDate(m.End)
-		messagestr += fmt.Sprintf("%s %s/%s %s:%s - %s/%s %s:%s\n ", title, smonth, sday, shour, smin,
+		messagestr += fmt.Sprintf("〇%s\n %s/%s %s:%s - %s/%s %s:%s\n", title, smonth, sday, shour, smin,
 			emonth, eday, ehour, emin)
 
 	}
@@ -37,5 +57,4 @@ func main() {
 	if _, err := bot.BroadcastMessage(message).Do(); err != nil {
 		log.Fatal(err)
 	}
-
 }
