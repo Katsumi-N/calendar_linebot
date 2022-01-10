@@ -26,7 +26,9 @@ func getClient(config *oauth2.Config) *http.Client {
 		tok = getTokenFromWeb(config)
 		saveToken(tokFile, tok)
 	}
-	return config.Client(context.Background(), tok)
+	tokenSource := config.TokenSource(context.Background(), tok)
+	return oauth2.NewClient(context.Background(), tokenSource)
+	//return config.Client(context.Background(), tok)
 }
 
 // Request a token from the web, then returns the retrieved token.
